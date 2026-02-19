@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Cart - Cloth Store{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-shopping-cart"></i> Shopping Cart</h2>
+
+{% if cart_items %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                {% for item in cart_items %}
+                <div class="row mb-3 border-bottom pb-3">
+                    <div class="col-md-3">
+                        <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="img-fluid rounded cart-product-img"
+                            style="height: 150px; width: auto; object-fit: cover; cursor: pointer;"
+                            onclick="openImageGallery(this)">
+                        
+                        <!-- Hidden storage for all images of this product -->
+                        <div class="product-images-data d-none">
+                            {% if item.product.images %}
+                                {% for img in item.product.images %}
+                                    <span data-url="{{ img.image_url }}"></span>
+                                {% endfor %}
+                            {% else %}
+                                <span data-url="{{ item.product.image_url }}"></span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>{{ item.product.name }}</h5>
+                        <p class="text-muted mb-1"> {{ item.product.gender|title }}</p>
+                        {% if item.size %}
+                        <p class="mb-1">Size: <strong>{{ item.size }}</strong></p>
+                        {% endif %}
+                       
+                        <p class="mt-2">Color: <strong>{{ item.product.color }}</strong></p>
+
+                        <p>
+                            {% if item.product.stock > 20 %}
+                            <span style="color: green; font-weight: bold;">In Stock</span>
+                            {% elif item.product.stock > 0 %}
+                            <span style="color: orange; font-weight: bold;">Few items left...!!!</span>
+                            {% else %}
+                            <span style="color: red; font-weight: bold;">Out Of Stock</span>
+                            {% endif %}
+                        </p>
+                        <div class="mb-2">
+                            {% if item.product.discount > 0 %}
+                            <p class="mb-1">
+                                <span class="text-decoration-line-through text-muted">
+                                    Rs {{ "%.2f"|format(item.product.price) }}
+                                </span>
+                                <span class="h5 text-danger ms-2">
+                                    Rs {{ "%.2f"|format(item.item_price) }}
+                                </span>
+                                <span class="badge bg-danger">Save {{ item.product.discount }}%</span>
+                            </p>
+                            {% else %}
+                            <p class="h5 mb-1">Rs {{ "%.2f"|format(item.product.price) }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <form action="{{ url_for('update_cart') }}" method="POST" class="mb-2">
+                            <input type="hidden" name="cart_item_id" value="{{ item.id }}">
+                            <div class="input-group input-group-sm" style="max-width: 100px;">
+                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1"
+                                    max="{{ item.product.stock }}" class="form-control text-center"
+                                    onchange="checkQuantityAndSubmit(this)">
+                            </div>
+                        </form>
+
+                        <p class="mb-2">
+                            <strong>Total:</strong> Rs {{ "%.2f"|format(item.item_total) }}
+                        </p>
+
+                        <a href="{{ url_for('remove_from_cart', cart_item_id=item.id) }}" class="btn btn-danger btn-sm"
+                            onclick="confirmRemove(event, this.href)">
+                            <i class="fas fa-trash"></i> Remove
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="card-body">
+                {% for item in cart_items %}
+                <div class="d-flex justify-content-between mb-2">
+                    <span>{{ item.product.name }} x{{ item.quantity }}</span>
+                    <span>Rs {{ "%.2f"|format(item.item_total) }}</span>
+                </div>
+                {% endfor %}
+
+                <hr>
+
+                <div class="d-flex justify-content-between">
+                    <strong>Total Amount:</strong>
+                    <strong class="h4 text-danger">Rs {{ "%.2f"|format(total) }}</strong>
+                </div>
+
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-lg" id="checkoutBtn">
+                        <i class="fas fa-credit-card"></i> Proceed to Checkout
+                    </a>
+                    <a href="{{ url_for('products') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-shopping-bag"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.getElementById('checkoutBtn').addEventListener('click', function (e) {
+        let inputs = document.querySelectorAll('input[name="quantity"]');
+        let hasError = false;
+        let errorHtml = '<ul style="text-align: left;">';
+
+        inputs.forEach(input => {
+            let quantity = parseInt(input.value);
+            let maxStock = parseInt(input.getAttribute('max'));
+
+            if (quantity > maxStock) {
+                hasError = true;
+                // Find product name roughly (traversing up to row)
+                let row = input.closest('.row');
+                let name = row.querySelector('h5').innerText;
+                errorHtml += `<li><strong>${name}</strong>: Requested ${quantity}, Available ${maxStock}</li>`;
+            }
+        });
+        errorHtml += '</ul>';
+
+        if (hasError) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Stock Not Available',
+                html: errorHtml + '<p>Please reduce the quantity to proceed.</p>',
+                confirmButtonText: 'OK',
+                customClass: {
+                    popup: 'animated fadeInDown'
+                }
+            });
+        }
+    });
+
+    function checkQuantityAndSubmit(input) {
+        let max = parseInt(input.getAttribute('max'));
+        let val = parseInt(input.value);
+
+        if (val > max) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Stock Limit',
+                text: 'Only ' + max + ' items available',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                input.value = max;
+                input.form.submit();
+            });
+        } else if (val < 1) {
+             input.value = 1;
+             input.form.submit();
+        } else {
+            input.form.submit();
+        }
+    }
+
+    function confirmRemove(event, url) {
+        event.preventDefault(); // Prevent default link behavior
+        
+        Swal.fire({
+            title: 'Remove Item?',
+            text: "Are you sure you want to remove this item from your cart?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, remove it!',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url; // Navigate to the remove URL
+            }
+        });
+    }
+</script>
+
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+    <h4>Your cart is empty</h4>
+    <p class="text-muted">Add some items to get started</p>
+    <a href="{{ url_for('products') }}" class="btn btn-primary">
+        <i class="fas fa-shopping-bag"></i> Shop Now
+    </a>
+</div>
+{% endif %}
+
+
+<!-- Image Gallery Modal (Carousel) -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-transparent border-0 shadow-none">
+        <div class="modal-header border-0 p-0">
+            <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 z-index-5" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1056; filter: invert(1);"></button>
+        </div>
+      <div class="modal-body p-0">
+        
+        <div id="galleryCarousel" class="carousel slide" data-bs-interval="false">
+            <div class="carousel-inner" id="carouselInner">
+                <!-- Slides will be injected here -->
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    function openImageGallery(imgElement) {
+        const container = imgElement.parentElement.querySelector('.product-images-data');
+        const spans = container.querySelectorAll('span');
+        const carouselInner = document.getElementById('carouselInner');
+        
+        // Clear existing slides
+        carouselInner.innerHTML = '';
+        
+        if (spans.length === 0) {
+            // Fallback to the src of the clicked image if no data found
+            const div = document.createElement('div');
+            div.className = 'carousel-item active';
+            div.innerHTML = `<img src="${imgElement.src}" class="d-block w-100 rounded" style="max-height: 80vh; object-fit: contain;">`;
+            carouselInner.appendChild(div);
+        } else {
+            spans.forEach((span, index) => {
+                const url = span.getAttribute('data-url');
+                const div = document.createElement('div');
+                div.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+                div.innerHTML = `<img src="${url}" class="d-block w-100 rounded" style="max-height: 80vh; object-fit: contain;">`;
+                carouselInner.appendChild(div);
+            });
+        }
+        
+        var myModal = new bootstrap.Modal(document.getElementById('imageModal'));
+        myModal.show();
+    }
+</script>
+
+{% endblock %}

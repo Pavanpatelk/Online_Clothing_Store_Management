@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Products - Cloth Store{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar Filters -->
+    <div class="col-md-3">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-filter"></i> Filters</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('products') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Gender</label>
+                        <div class="list-group">
+                            <a href="{{ url_for('products', gender='all') }}" 
+                               class="list-group-item list-group-item-action {% if selected_gender == 'all' %}active{% endif %}">
+                                All Genders
+                            </a>
+                            <a href="{{ url_for('products', gender='men') }}" 
+                               class="list-group-item list-group-item-action {% if selected_gender == 'men' %}active{% endif %}">
+                                Men
+                            </a>
+                            <a href="{{ url_for('products', gender='women') }}" 
+                               class="list-group-item list-group-item-action {% if selected_gender == 'women' %}active{% endif %}">
+                                Women
+                            </a>
+                            <a href="{{ url_for('products', gender='kids') }}" 
+                               class="list-group-item list-group-item-action {% if selected_gender == 'kids' %}active{% endif %}">
+                                Kids
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <div class="list-group">
+                            <a href="{{ url_for('products', gender=selected_gender) }}" 
+                               class="list-group-item list-group-item-action {% if not selected_category %}active{% endif %}">
+                                All Categories
+                            </a>
+                            {% set men_kids_cats = ['t-shirt', 'shirt', 'jeans', 'hoodie', 'jacket', 'joggers', 'trousers'] %}
+                            {% set women_cats = ['t-shirt', 'shirt', 'jeans', 'hoodie', 'jacket', 'joggers', 'trousers', 'kurti', 'dress'] %}
+
+                            {% for category in categories %}
+                                {% set cat_name = category.name.strip().lower() %}
+                                {% set show_cat = True %}
+                                
+                                {% if selected_gender in ['men', 'kids'] %}
+                                    {% if cat_name not in men_kids_cats %}
+                                        {% set show_cat = False %}
+                                    {% endif %}
+                                {% elif selected_gender == 'women' %}
+                                    {% if cat_name not in women_cats %}
+                                        {% set show_cat = False %}
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if show_cat %}
+                                <a href="{{ url_for('products', gender=selected_gender, category=category.id) }}" 
+                                   class="list-group-item list-group-item-action {% if selected_category == category.id %}active{% endif %}">
+                                    {{ category.name }}
+                                </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <a href="{{ url_for('products') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Clear Filters
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Products Grid -->
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>All Products</h2>
+            <span class="badge bg-primary">Showing {{ (pagination.page - 1) * pagination.per_page + 1 }} - {{ [(pagination.page * pagination.per_page), pagination.total] | min }} of {{ pagination.total }} products</span>
+        </div>
+        
+        {% if products %}
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-md-4 col-sm-6">
+                <div class="card product-card h-100">
+                    {% if product.discount > 0 %}
+                    <span class="badge bg-danger position-absolute" style="top: 10px; left: 10px;">{{ product.discount }}% OFF</span>
+                    {% endif %}
+                     <a href="{{ url_for('product_detail', product_id=product.id) }}">
+                        <img src="{{ product.image_url }}"
+                            class="card-img-top product-image"
+                            alt="{{ product.name }}">
+                    </a>
+
+
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{{ url_for('product_detail', product_id=product.id) }}"
+                            class="text-decoration-none text-dark">
+                                {{ product.name }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-muted">{{ product.category.name }} - {{ product.gender|title }}</p>
+                        <p class="card-text small">{{ product.description[:100] }}...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {% if product.discount > 0 %}
+                                <span class="text-decoration-line-through text-muted">Rs {{ product.price }}</span>
+                                <span class="h5 text-danger ms-2">Rs {{ product.get_discounted_price() }}</span>
+                                {% else %}
+                                <span class="h5">Rs {{ product.price }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white">
+                        {% if product.stock > 0 %}
+                            {% if session.get('user_id') %}
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
+                                    <i class="fas fa-cart-plus"></i> Add to Cart
+                                </button>
+
+                                <a href="{{ url_for('add_to_wishlist', product_id=product.id) }}" class="btn btn-outline-danger btn-sm" title="Add to Wishlist">
+                                    <i class="fas fa-heart"></i>
+                                </a>
+                            </div>
+                            {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm w-100">
+                                <i class="fas fa-sign-in-alt"></i> Login to Purchase
+                            </a>
+                            {% endif %}
+                        {% else %}
+                        <button class="btn btn-secondary btn-sm w-100" disabled>Out of Stock</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Modals Loop -->
+        {% for product in products %}
+        <!-- Add to Cart Modal -->
+        <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ product.name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ url_for('add_to_cart') }}" method="POST">
+                        <div class="modal-body">
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Select Size:</label>
+                                <select class="form-select" name="size" required>
+                                    {% if product.size %}
+                                        {% for s in product.size.split(',') %}
+                                            <option value="{{ s.strip() }}">{{ s.strip() }}</option>
+                                        {% endfor %}
+                                    {% else %}
+                                        <option value="One Size">One Size</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Quantity:</label>
+                                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock if product.stock else 1 }}" class="form-control">
+                                <small class="text-muted">Available Stock: {{ product.stock if product.stock else 0 }}</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <!-- Previous Page -->
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('products', page=pagination.prev_num, gender=selected_gender, category=selected_category) }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                <!-- Page Numbers -->
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('products', page=page_num, gender=selected_gender, category=selected_category) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Next Page -->
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('products', page=pagination.next_num, gender=selected_gender, category=selected_category) }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h4>No products found</h4>
+            <p class="text-muted">Try adjusting your filters</p>
+            <a href="{{ url_for('products') }}" class="btn btn-primary">Clear Filters</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,493 @@
+/* Custom Styles for Cloth Store */
+
+/* Global Styles */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    overflow-x: hidden;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Cards */
+.product-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid #dee2e6;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.product-image {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.category-card {
+    transition: transform 0.3s;
+}
+
+.category-card:hover {
+    transform: scale(1.05);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* Forms */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Tables */
+.table th {
+    background-color: var(--dark-color);
+    color: white;
+    border-color: var(--dark-color);
+}
+
+/* Badges */
+.badge {
+    padding: 5px 10px;
+    font-weight: 500;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.hero-section .btn-primary {
+    background-color: white;
+    color: var(--primary-color);
+    border: none;
+}
+
+.hero-section .btn-primary:hover {
+    background-color: #f8f9fa;
+}
+
+/* Features */
+.feature-item {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.feature-item:hover {
+    transform: translateY(-5px);
+}
+
+.feature-item i {
+    color: var(--primary-color);
+}
+
+/* Cart Items */
+.cart-item {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+/* Footer */
+footer a:hover {
+    color: #ffffff !important;
+    text-decoration: underline !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section .display-4 {
+        font-size: 2rem;
+    }
+
+    .product-card {
+        margin-bottom: 20px;
+    }
+
+    .navbar-nav {
+        text-align: center;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Premium Desktop Carousel Effects */
+@media (min-width: 992px) {
+    .carousel-item {
+        overflow: hidden;
+    }
+
+    /* 1. Scale-Fade Transition for Slide Change */
+    .carousel-fade .carousel-item {
+        opacity: 0;
+        transition-property: opacity, transform;
+        transition-duration: 1.5s;
+        /* Slower, cinematic transition */
+        transition-timing-function: cubic-bezier(0.2, 1, 0.3, 1);
+        /* Smoth easing */
+        transform: scale(1.1);
+        /* Incoming slide starts zoomed in */
+        z-index: 1;
+    }
+
+    .carousel-fade .carousel-item.active,
+    .carousel-fade .carousel-item-next.carousel-item-start,
+    .carousel-fade .carousel-item-prev.carousel-item-end {
+        opacity: 1;
+        transform: scale(1);
+        /* Lands at normal scale */
+        z-index: 2;
+    }
+
+    .carousel-fade .active.carousel-item-start,
+    .carousel-fade .active.carousel-item-end {
+        opacity: 0;
+        transform: scale(1.1);
+        z-index: 1;
+    }
+
+    /* 2. Continued Ken Burns Effect (Internal Image Zoom) */
+    .carousel-item.active img {
+        animation: zoomEffect 20s infinite alternate;
+    }
+}
+
+@keyframes zoomEffect {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1.15);
+    }
+}
+
+/* CAROUSEL CONTROLS VISIBILITY FIX */
+.carousel-control-prev,
+.carousel-control-next {
+    z-index: 100;
+    /* Force above everything */
+    width: 6%;
+    /* Slightly wider clickable area */
+}
+
+/* Add a dark circular background to the arrow icons so they show on light images */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    background-size: 50%;
+    backdrop-filter: blur(2px);
+}
+
+.carousel-control-prev-icon:hover,
+.carousel-control-next-icon:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+    transition: all 0.2s ease;
+}
+
+/* Loading Spinner */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Alert Customization */
+.alert {
+    border: none;
+    border-radius: 8px;
+    padding: 15px 20px;
+}
+
+/* Modal Customization */
+.modal-content {
+    border-radius: 10px;
+    border: none;
+}
+
+.modal-header {
+    border-radius: 10px 10px 0 0;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #0b5ed7;
+}
+
+/* Input Group Customization */
+.input-group-text {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Card Header Customization */
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+/* Category cards same height */
+.categories .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Category images same size */
+.category-img {
+    width: 100%;
+    height: 300px;
+    /* 🔑 SAME HEIGHT */
+    object-fit: cover;
+    /* 🔑 crop nicely */
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+
+/* Card body align bottom */
+.categories .card-body {
+    margin-top: auto;
+    text-align: center;
+}
+
+/* Add to style.css */
+
+/* Payment Input Styles */
+.payment-inputs {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    margin-top: 15px;
+}
+
+.card-input:focus,
+.upi-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Payment Loader Animation */
+.payment-loader {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+}
+
+.payment-loader .spinner-border {
+    width: 80px;
+    height: 80px;
+    border-width: 8px;
+}
+
+/* Payment Success SVG Animation (NEW) */
+.success-animation svg {
+    width: 120px;
+    height: 120px;
+    animation: popSuccess 0.4s ease-out;
+    filter: drop-shadow(0 0 10px rgba(25, 135, 84, 0.5));
+}
+
+@keyframes popSuccess {
+    0% {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+
+/* Progress Bar Animation */
+.progress-bar-animated {
+    animation: progress-animation 3s ease-in-out;
+}
+
+@keyframes progress-animation {
+    0% {
+        width: 0%;
+    }
+
+    25% {
+        width: 25%;
+    }
+
+    50% {
+        width: 50%;
+    }
+
+    75% {
+        width: 75%;
+    }
+
+    100% {
+        width: 100%;
+    }
+}
+
+/* Payment Method Active State */
+.list-group-item.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Card Input Formatting */
+#card_number {
+    letter-spacing: 1px;
+}
+
+/* Responsive Payment */
+@media (max-width: 768px) {
+    .payment-inputs {
+        padding: 15px;
+    }
+
+    .success-animation {
+        width: 80px;
+        height: 80px;
+    }
+
+    .checkmark {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* Image Zoom Overlay Logic */
+.zoomable-image {
+    cursor: zoom-in; /* Fallback */
+    cursor: -moz-zoom-in;
+    cursor: -webkit-zoom-in;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.zoomable-image:hover {
+    opacity: 0.95;
+    transform: scale(1.02); /* Subtle hint */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+}
+
+.image-zoom-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000000 !important; /* Force Solid Black */
+    z-index: 2147483647;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-out;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s;
+}
+
+.image-zoom-overlay.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.image-zoom-overlay img {
+    max-width: 90vw;
+    max-height: 90vh;
+    min-width: 400px; /* Force small images to scale up */
+    width: auto;
+    object-fit: contain;
+    transform: scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    box-shadow: 0 0 50px rgba(255,255,255,0.1); /* Subtle glow instead of dark shadow on black */
+    border-radius: 4px;
+    background-color: white; /* Ensure image has white bg if transparent png */
+}
+
+.image-zoom-overlay.active img {
+    transform: scale(1);
+}
+
+@media (max-width: 768px) {
+    .image-zoom-overlay img {
+        min-width: 90vw; /* Responsive scaling */
+    }
+}

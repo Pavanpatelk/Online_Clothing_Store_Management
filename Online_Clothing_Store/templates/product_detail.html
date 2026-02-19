@@ -1,0 +1,125 @@
+<!-- templates/product_detail.html -->
+{% extends "base.html" %} {% block content %}
+
+<div class="container mt-5">
+  <div class="row">
+    <!-- Product Image Carousel -->
+    <div class="col-md-5">
+      {% if product.images %}
+      <div
+        id="productCarousel"
+        class="carousel slide shadow rounded"
+        data-bs-interval="false"
+      >
+        <div class="carousel-inner">
+          {% for img in product.images %}
+          <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <img
+              src="{{ img.image_url }}"
+              class="d-block w-100 zoomable-image"
+              alt="{{ product.name }}"
+              style="height: 500px; object-fit: contain; background: #f8f9fa"
+            />
+          </div>
+          {% endfor %}
+        </div>
+        {% if product.images|length > 1 %}
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#productCarousel"
+          data-bs-slide="prev"
+        >
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#productCarousel"
+          data-bs-slide="next"
+        >
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+        {% endif %}
+      </div>
+
+      <!-- Thumbnail Indicators -->
+      <div class="d-flex gap-2 overflow-auto mt-2 justify-content-center">
+        {% for img in product.images %}
+        <img
+          src="{{ img.image_url }}"
+          class="img-thumbnail"
+          style="width: 60px; height: 60px; object-fit: cover; cursor: pointer"
+          data-bs-target="#productCarousel"
+          data-bs-slide-to="{{ loop.index0 }}"
+        />
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <!-- Fallback for old products with single image -->
+      <img
+        src="{{ product.image_url }}"
+        class="img-fluid rounded shadow zoomable-image"
+        alt="{{ product.name }}"
+      />
+      {% endif %}
+    </div>
+
+    <!-- Product Info -->
+    <div class="col-md-7">
+      <h2>{{ product.name }}</h2>
+
+      {% if product.discount > 0 %}
+      <h4 class="text-danger">
+        Rs {{ product.discounted_price }}
+        <small class="text-muted text-decoration-line-through">
+          Rs {{ product.price }}
+        </small>
+      </h4>
+      {% else %}
+      <h4 class="text-success">Rs {{ product.price }}</h4>
+      {% endif %}
+      <p class="mt-3" style="white-space: pre-line">
+        {{ product.description }}
+      </p>
+
+      <!-- Add to Cart -->
+      {% if product.stock > 0 %}
+      <form method="POST" action="{{ url_for('add_to_cart') }}">
+        {% if product.size %}
+        <div class="mb-3">
+          <label for="sizeSelect" class="form-label">Size:</label>
+          <select
+            class="form-select w-auto"
+            name="size"
+            id="sizeSelect"
+            required
+          >
+            <option value="" selected disabled>Select Size</option>
+            {% for s in product.size.split(',') %}
+            <option value="{{ s|trim }}">{{ s|trim }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+        <input type="hidden" name="product_id" value="{{ product.id }}" />
+        <input type="hidden" name="quantity" value="1" />
+        <button type="submit" class="btn btn-primary">🛒 Add to Cart</button>
+      </form>
+      {% endif %}
+
+      <!-- Wishlist -->
+      <a
+        href="{{ url_for('add_to_wishlist', product_id=product.id) }}"
+        class="btn btn-outline-danger mt-2"
+      >
+        ❤️ Wishlist
+      </a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

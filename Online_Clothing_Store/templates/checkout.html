@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - Cloth Store{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-credit-card"></i> Checkout</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Shipping Address</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('checkout') }}" class="needs-validation">
+                    <div class="mb-3" >
+                        <label for="shipping_address" class="form-label" >Full Address</label>
+                        <textarea class="form-control" id="shipping_address" name="shipping_address" rows="3" placeholder="Enter your complete shipping address" required ></textarea>
+                    </div>
+
+                    <!-- Replace the payment method section in checkout.html -->
+                    <div class="mb-4">
+                        <label class="form-label">Payment Method</label>
+                        <div class="list-group">
+                            <label class="list-group-item">
+                                <input class="form-check-input me-1 payment-method" type="radio" name="payment_method" value="Credit Card" checked data-type="card">
+                                <i class="fas fa-credit-card"></i> Credit Card
+                            </label>
+                            <label class="list-group-item">
+                                <input class="form-check-input me-1 payment-method" type="radio" name="payment_method" value="Debit Card" data-type="card">
+                                <i class="fas fa-credit-card"></i> Debit Card
+                            </label>
+                            <label class="list-group-item">
+                                <input class="form-check-input me-1 payment-method" type="radio" name="payment_method" value="UPI" data-type="upi">
+                                <i class="fas fa-mobile-alt"></i> UPI (GPay/PhonePe/Paytm)
+                            </label>
+                            <!-- <label class="list-group-item">
+                                <input class="form-check-input me-1 payment-method" type="radio" name="payment_method" value="Net Banking" data-type="netbanking">
+                                <i class="fas fa-university"></i> Net Banking
+                            </label> -->
+                            <label class="list-group-item">
+                                <input class="form-check-input me-1 payment-method" type="radio" name="payment_method" value="Cash on Delivery" data-type="cod">
+                                <i class="fas fa-money-bill-wave"></i> Cash on Delivery
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details Input Fields -->
+                    <div id="payment-details" class="mb-4">
+                        <!-- Card Details -->
+                        <div id="card-details" class="payment-inputs">
+                            <div class="mb-3">
+                                <label for="card_number" class="form-label">Card Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                    <input type="text" class="form-control card-input" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" maxlength="19">
+                                </div>
+                                <!-- <div class="form-text">Use: 4111 1111 1111 1111 for demo</div> -->
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="expiry_date" class="form-label">Expiry Date</label>
+                                    <!-- <input type="text" class="form-control card-input" id="expiry_date" name="expiry_date" 
+                                        placeholder="MM/YY"> -->
+                                    <input type="text"
+                                        class="form-control card-input"
+                                        id="expiry_date"
+                                        name="expiry_date"
+                                        placeholder="MM/YY"
+                                        maxlength="5">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control card-input" id="cvv" name="cvv" 
+                                        placeholder="123" maxlength="3">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- UPI Details -->
+                        <div id="upi-details" class="payment-inputs" style="display: none;">
+                            <div class="mb-3">
+                                <label for="upi_id" class="form-label">UPI ID</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-mobile-alt"></i></span>
+                                    <input type="text" class="form-control upi-input" id="upi_id" name="upi_id" 
+                                        placeholder="username@upi">
+                                </div>
+                                <div class="form-text">Use: demo@upi for demo</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Processing Modal -->
+                    <div class="modal fade" id="paymentProcessingModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-body text-center p-5">
+                                    <div class="payment-loader mb-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                    <h4 class="mb-3">Processing Payment</h4>
+                                    <p class="text-muted">Please wait while we process your payment...</p>
+                                    <div class="progress mb-3" style="height: 10px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                            role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <p id="payment-status" class="small text-muted">Initializing payment...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Success Modal -->
+                    <div class="modal fade" id="paymentSuccessModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-body text-center p-5">
+                                    <div class="success-animation mb-4">
+                                        <svg width="120" height="120" viewBox="0 0 100 100"
+                                            xmlns="http://www.w3.org/2000/svg">
+
+                                            <!-- Green Circle -->
+                                            <circle cx="50" cy="50" r="45" fill="#28a745"/>
+
+                                            <!-- White Check -->
+                                            <path d="M30 52 L45 65 L70 38"
+                                                fill="none"
+                                                stroke="#ffffff"
+                                                stroke-width="8"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+
+                                    <h4 class="text-success mb-3">Payment Successful!</h4>
+                                    <p class="mb-4">Your payment has been processed successfully.</p>
+                                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" id="continue-after-payment">
+                                        Continue
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Update the submit button -->
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-primary btn-lg" id="process-payment-btn">
+                            <i class="fas fa-lock"></i> Pay Now - Rs {{ total }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Order Items</h5>
+            </div>
+            <div class="card-body">
+                {% for item in cart_items %}
+                <div class="d-flex justify-content-between mb-2 border-bottom pb-2">
+                    <div>
+                        <strong>{{ item.product.name }}</strong>
+                        <div class="text-muted small">Qty: {{ item.quantity }} {% if item.size %}| Size: {{ item.size }}{% endif %}</div>
+                    </div>
+                    <div>Rs {{ item.product.get_discounted_price() * item.quantity }}</div>
+                </div>
+                {% endfor %}
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <strong>Total Amount:</strong>
+                    <strong class="h4 text-danger">Rs {{ total }}</strong>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6><i class="fas fa-shield-alt text-success"></i> Secure Checkout</h6>
+                <p class="small text-muted">Your payment information is encrypted and secure.</p>
+                <h6><i class="fas fa-shipping-fast text-info"></i> Delivery</h6>
+                <p class="small text-muted">Estimated delivery: 3-5 business days</p>
+                <h6><i class="fas fa-undo-alt text-warning"></i> Returns</h6>
+                <p class="small text-muted">30-day return policy</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

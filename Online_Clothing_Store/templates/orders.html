@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders - Cloth Store{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-history"></i> My Orders</h2>
+
+{% if orders %}
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Order #</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>
+                    <strong>{{ order.order_number }}</strong>
+                    <div class="small text-muted">{{ order.payment_method }}</div>
+                </td>
+                <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>{{ order.total_items }} items</td>
+                <td class="fw-bold">Rs {{ order.total_amount }}</td>
+                <td>
+                    {% if order.status == 'Processing' %}
+                    <span class="badge bg-warning">{{ order.status }}</span>
+                    {% elif order.status == 'Shipped' %}
+                    <span class="badge bg-info">{{ order.status }}</span>
+                    {% elif order.status == 'Delivered' %}
+                    <span class="badge bg-success">{{ order.status }}</span>
+                    {% elif order.status == 'Cancelled' %}
+                    <span class="badge bg-danger">{{ order.status }}</span>
+                    {% elif order.status == 'Return Requested' %}
+                    <span class="badge bg-warning text-dark">{{ order.status }}</span>
+                    {% elif order.status == 'Returned' %}
+                    <span class="badge bg-secondary">{{ order.status }}</span>
+                    {% elif order.status == 'Return Rejected' %}
+                    <span class="badge bg-danger">Rejected</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ order.status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if order.payment_status == 'Completed' %}
+                    <span class="badge bg-success">{{ order.payment_status }}</span>
+                    {% else %}
+                    <span class="badge bg-warning">{{ order.payment_status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                        data-bs-target="#orderModal{{ order.id }}">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    {% if order.status not in ['Cancelled', 'Shipped', 'Delivered', 'Return Requested', 'Returned'] %}
+                    <a href="{{ url_for('cancel_order', order_id=order.id) }}" class="btn btn-sm btn-outline-danger"
+                        onclick="return confirm('Are you sure you want to cancel this order?')">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    {% endif %}
+
+                    {% if order.status == 'Delivered' %}
+                    <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" 
+                        data-bs-target="#returnModal{{ order.id }}">
+                        <i class="fas fa-undo"></i> Return
+                    </button>
+                    {% endif %}
+
+                    <!-- Return Confirmation Modal -->
+                    <div class="modal fade" id="returnModal{{ order.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-warning">
+                                    <h5 class="modal-title text-dark"><i class="fas fa-undo-alt"></i> Return Order</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center py-4">
+                                    <div class="mb-3">
+                                        <i class="fas fa-box-open fa-4x text-warning"></i>
+                                    </div>
+                                    <h5 class="mb-3">Return Order #{{ order.order_number }}?</h5>
+                                    <p class="text-muted mb-4">
+                                        Are you sure you want to return this order?<br>
+                                        Our team will review your request and process the return.
+                                    </p>
+                                    <div class="d-grid gap-2 col-8 mx-auto">
+                                        <a href="{{ url_for('return_order', order_id=order.id) }}" class="btn btn-warning btn-lg text-dark fw-bold">
+                                            Confirm Return
+                                        </a>
+                                        <button type="button" class="btn btn-light text-muted" data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal for Order Details -->
+                    <div class="modal fade" id="orderModal{{ order.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title">Order Details - {{ order.order_number }}</h5>
+                                    <button type="button" class="btn-close btn-close-white"
+                                        data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <h6>Order Information</h6>
+                                            <p><strong>Date:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                            </p>
+                                            <p><strong>Status:</strong> <span class="badge bg-info">{{ order.status
+                                                    }}</span>
+                                            </p>
+                                            <p><strong>Payment:</strong> {{ order.payment_method }} -
+                                                <span class="badge bg-success">{{ order.payment_status }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Shipping Address</h6>
+                                            <p>{{ order.shipping_address|replace('\n', '<br>')|safe }}</p>
+                                        </div>
+                                    </div>
+
+                                    <h6>Order Items</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>Price</th>
+                                                    <th>Quantity</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in order.order_items %}
+                                                <tr>
+                                                    <td>{{ item.product_name }}</td>
+                                                    <td>Rs {{ item.price_at_time }}</td>
+                                                    <td>{{ item.quantity }}</td>
+                                                    <td>Rs {{ item.price_at_time * item.quantity }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="text-end">
+                                        <h5>Total: Rs {{ order.total_amount }}</h5>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+    <h4>No orders yet</h4>
+    <p class="text-muted">Your order history will appear here</p>
+    <a href="{{ url_for('products') }}" class="btn btn-primary">
+        <i class="fas fa-shopping-bag"></i> Start Shopping
+    </a>
+</div>
+{% endif %}
+{% endblock %}

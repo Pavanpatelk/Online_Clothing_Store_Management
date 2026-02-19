@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Add Product - Cloth Store{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-plus"></i> Add New Product</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('add_product') }}">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Product Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="price" class="form-label">Price (Rs)</label>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="discount" class="form-label">Discount (%)</label>
+                            <input type="number" class="form-control" id="discount" name="discount" min="0" max="100" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="category_id" class="form-label">Category</label>
+                            <select class="form-select" id="category_id" name="category_id" required>
+                                <option value="">Select Category</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="men">Men</option>
+                                <option value="women">Women</option>
+                                <option value="kids">Kids</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Size & Stock</label>
+                            <div class="border p-3 rounded bg-light">
+                                {% for s in ['XS', 'S', 'M', 'L', 'XL', 'XXL'] %}
+                                <div class="row align-items-center mb-2">
+                                    <div class="col-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input size-check" type="checkbox" name="size" value="{{ s }}" id="size{{ s }}">
+                                            <label class="form-check-label fw-bold" for="size{{ s }}">{{ s }}</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-8">
+                                        <input type="number" class="form-control form-control-sm stock-input transition-all" 
+                                               name="stock_{{ s }}" id="stock_{{ s }}" placeholder="Qty" 
+                                               min="0" disabled style="display:none;">
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">Select sizes to enter stock for each.</small>
+                            
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    document.querySelectorAll('.size-check').forEach(check => {
+                                        check.addEventListener('change', function() {
+                                            const stockInput = document.getElementById('stock_' + this.value);
+                                            if (this.checked) {
+                                                stockInput.style.display = 'block';
+                                                stockInput.disabled = false;
+                                                stockInput.required = true;
+                                                if(stockInput.value === '') stockInput.value = 1;
+                                            } else {
+                                                stockInput.style.display = 'none';
+                                                stockInput.disabled = true;
+                                                stockInput.required = false;
+                                            }
+                                        });
+                                    });
+                                });
+                            </script>
+                        </div>
+                        </div> 
+                        <div class="col-md-6 mb-3">
+                            <label for="color" class="form-label">Color</label>
+                            <input type="text" class="form-control" id="color" name="color" required>
+                        </div>
+                    </div>
+                    
+
+                    
+                    <div class="mb-3">
+                        <label for="image_url" class="form-label">Image URLs</label>
+                        <div id="image-url-container">
+                            <div class="input-group mb-2">
+                                <input type="url" class="form-control" name="image_urls" placeholder="https://example.com/image.jpg">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="addImageUrlField()">
+                            <i class="fas fa-plus"></i> Add Another Image
+                        </button>
+                        <div class="form-text">
+                            Leave empty to use default placeholder image. The first image will be the main image.
+                        </div>
+                    </div>
+
+                    <script>
+                    function addImageUrlField() {
+                        const container = document.getElementById('image-url-container');
+                        const div = document.createElement('div');
+                        div.className = 'input-group mb-2';
+                        div.innerHTML = `
+                            <input type="url" class="form-control" name="image_urls" placeholder="https://example.com/image.jpg">
+                            <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `;
+                        container.appendChild(div);
+                    }
+                    </script>
+                    
+                    <div class="mb-3">
+                        <div class="form-text">
+                            <strong>Note:</strong> Discounted price will be calculated automatically based on the discount percentage.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('admin_products') }}" class="btn btn-secondary me-md-2">
+                    <i class="fas fa-arrow-left"></i> Back to Products
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Add Product
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

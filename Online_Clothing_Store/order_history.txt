@@ -1,0 +1,73 @@
+
+
+========================================
+Order ID:   ORD-20260201104337-8YGVX4
+Customer:   admin
+Items:      COMFORT SUIT TROUSERS (Qty: 5)
+Total:      rs 16862.50
+Date:       2026-02-01 10:43:37
+========================================
+
+========================================
+Order ID:   ORD-20260201104952-S7OJXZ
+Customer:   admin
+Items:      COMFORT SUIT TROUSERS (Qty: 1)
+Total:      rs 3372.50
+Date:       2026-02-01 10:49:52
+========================================
+
+========================================
+Order ID:   ORD-20260208110558-67S5IC
+Customer:   Sujal
+Items:      Greatest Pink Half Sleeve Striped Shirt (Size: M, Qty: 1)
+Total:      rs 1403.22
+Date:       2026-02-08 11:05:58
+========================================
+
+========================================
+Order ID:   ORD-20260208113314-8DC52U
+Customer:   Sujal
+Items:      LINEN - COTTON SHIRT (Size: M, Qty: 1)
+Total:      rs 3372.50
+Date:       2026-02-08 11:33:14
+========================================
+
+========================================
+Order ID:   ORD-20260213121234-IWFRD3
+Customer:   Sujal
+Items:      COMFORT JOGGER WAIST TROUSERS (Size: X, Qty: 1)
+Total:      rs 3087.50
+Date:       2026-02-13 12:12:34
+========================================
+
+========================================
+Order ID:   ORD-20260217154619-1D7GZ9
+Customer:   admin
+Items:      Midnight Black Baggy Denim Jeans (Size: M, Qty: 1)
+Total:      rs 2015.04
+Date:       2026-02-17 15:46:19
+========================================
+
+========================================
+Order ID:   ORD-20260217154958-EZXQJE
+Customer:   admin
+Items:      Broken Dreams Half Sleeve Striped Shirt (Size: XS, Qty: 1)
+Total:      rs 1500.00
+Date:       2026-02-17 15:49:58
+========================================
+
+========================================
+Order ID:   ORD-20260217202108-QDBE73
+Customer:   Sujal
+Items:      JEANS Z1975 STRAIGHT LOW-RISE FULL LENGTH (Size: S, Qty: 1), Pink Kurti (Size: S, Qty: 1)
+Total:      rs 5285.00
+Date:       2026-02-17 20:21:08
+========================================
+
+========================================
+Order ID:   ORD-20260219221928-S6PABZ
+Customer:   admin
+Items:      Broken Dreams Half Sleeve Striped Shirt (Size: XS, Qty: 3), Slogan Sweatshirt (Size: S, Qty: 2), ANIMAL PRINT STAR ZIP-UP HOODIE (Size: S, Qty: 1)
+Total:      rs 10228.50
+Date:       2026-02-19 22:19:28
+========================================

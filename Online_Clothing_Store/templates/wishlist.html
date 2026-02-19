@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Wishlist{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">❤️ My Wishlist</h2>
+
+    {% if items %}
+    <div class="row">
+        {% for item in items %}
+        <div class="col-md-4">
+            <div class="card mb-3">
+
+                <img src="{{ item.product.image_url }}" class="card-img-top"
+                    style="max-width:100%; max-height:100%; object-fit:contain; cursor:pointer;">
+
+                <div class="card-body">
+                    <h5>{{ item.product.name }}</h5>
+                    <h5 class="text-muted">{{ item.product.category.name }}</h5>
+                    <h5 class="text-muted">Size-{{ item.product.size }}</h5>
+                    <p class="text-dark">₹ {{ item.product.discounted_price }}</p>
+                    <form action="{{ url_for('add_to_cart') }}" method="POST" class="m-0">
+                        <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-success btn-sm px-3">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </form>
+                    <br>
+                    <a href="{{ url_for('remove_wishlist', id=item.id) }}" class="btn btn-danger btn-sm px-3">
+                        Remove
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No items in wishlist.</p>
+    {% endif %}
+</div>
+{% endblock %}

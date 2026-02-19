@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Orders - Cloth Store{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-clipboard-list"></i> Manage Orders</h2>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>
+                    <strong>{{ order.order_number }}</strong>
+                    <div class="small text-muted">{{ order.payment_method }}</div>
+                </td>
+                <td>{{ order.user.username }}</td>
+                <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>{{ order.total_items }} items</td>
+                <td class="fw-bold">Rs{{ order.total_amount }}</td>
+                <td>
+                    <select class="form-select form-select-sm status-select" data-order-id="{{ order.id }}">
+                        <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                        <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                        <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="Return Requested" {% if order.status == 'Return Requested' %}selected{% endif %}>Return Requested</option>
+                        <option value="Returned" {% if order.status == 'Returned' %}selected{% endif %}>Returned</option>
+                        <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </td>
+                <td>
+                    <span class="badge {% if order.payment_status == 'Completed' %}bg-success{% else %}bg-warning{% endif %}">
+                        {{ order.payment_status }}
+                    </span>
+                </td>
+                <td>
+                    <a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" 
+                       data-bs-target="#orderModal{{ order.id }}">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </td>
+            </tr>
+            
+            <!-- Modal for Order Details -->
+            <div class="modal fade" id="orderModal{{ order.id }}" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">Order Details - {{ order.order_number }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6>Customer Information</h6>
+                                    <p><strong>Username:</strong> {{ order.user.username }}</p>
+                                    <p><strong>Email:</strong> {{ order.user.email }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Shipping Address</h6>
+                                    <p>{{ order.shipping_address|replace('\n', '<br>')|safe }}</p>
+                                </div>
+                            </div>
+                            
+                            <h6>Order Items</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Price</th>
+                                            <th>Quantity</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in order.order_items %}
+                                        <tr>
+                                            <td>{{ item.product_name }}</td>
+                                            <td>Rs{{ item.price_at_time }}</td>
+                                            <td>{{ item.quantity }}</td>
+                                            <td>Rs{{ item.price_at_time * item.quantity }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="text-end">
+                                <h5>Total: Rs{{ order.total_amount }}</h5>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.querySelectorAll('.status-select').forEach(select => {
+    select.addEventListener('change', function() {
+        const orderId = this.dataset.orderId;
+        const newStatus = this.value;
+        
+        fetch("{{ url_for('update_order_status') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                order_id: orderId,
+                status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                
+            } else {
+                alert('Error updating status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating status');
+        });
+    });
+});
+</script>
+{% endblock %}
