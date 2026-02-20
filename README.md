@@ -17,13 +17,31 @@ A Python Flask-based web application for managing an online clothing store.
 ## Screenshots
 
 ### Home Page
-![Home Page](screenshots/home.png)
+![Home Page](Online_Clothing_Store/Project_SS/home.png)
 
 ### Login Page
-![Login Page](screenshots/login.png)
+![Login Page](Online_Clothing_Store/Project_SS/login.png)
 
-### Products Page
-![Products](screenshots/products.png)
+### Admin Dashboard
+![Products](Online_Clothing_Store/Project_SS/admin_deshboard.png)
+
+### All Product
+![Products](Online_Clothing_Store/Project_SS/all_product.png)
+
+### Wishlist Page
+![Products](Online_Clothing_Store/Project_SS/wishlist.png)
+
+### Order Page
+![Products](Online_Clothing_Store/Project_SS/order_page.png)
+
+### Cart Page
+![Products](Online_Clothing_Store/Project_SS/cart.png)
+
+### Order Checkout
+![Products](Online_Clothing_Store/Project_SS/checkout.png)
+
+### Order History
+![Products](Online_Clothing_Store/Project_SS/order_hist.png)
 
 ## How to Run
 ```bash
